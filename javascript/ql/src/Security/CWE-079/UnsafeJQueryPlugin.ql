@@ -3,6 +3,7 @@
  * @description A jQuery plugin that unintentionally constructs HTML from some of its options may be unsafe to use for clients.
  * @kind path-problem
  * @problem.severity warning
+ * @security-severity 6.1
  * @precision high
  * @id js/unsafe-jquery-plugin
  * @tags security
@@ -12,14 +13,14 @@
  */
 
 import javascript
-import semmle.javascript.security.dataflow.UnsafeJQueryPlugin::UnsafeJQueryPlugin
+import semmle.javascript.security.dataflow.UnsafeJQueryPluginQuery
 import DataFlow::PathGraph
 
 from
-  Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink, JQueryPluginMethod plugin
+  Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink,
+  JQuery::JQueryPluginMethod plugin
 where
   cfg.hasFlowPath(source, sink) and
-  source.getNode().(Source).getPlugin() = plugin and
-  not isLikelyIntentionalHtmlSink(plugin, sink.getNode())
+  source.getNode().(Source).getPlugin() = plugin
 select sink.getNode(), source, sink, "Potential XSS vulnerability in the $@.", plugin,
   "'$.fn." + plugin.getPluginName() + "' plugin"

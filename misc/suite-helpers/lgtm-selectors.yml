@@ -21,3 +21,8 @@
       - file-classifier
 - exclude:
     deprecated: //
+- exclude:
+    query path:
+      - /^experimental\/.*/
+      - Metrics/Summaries/FrameworkCoverage.ql
+      - /Diagnostics/Internal/.*/

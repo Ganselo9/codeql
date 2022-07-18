@@ -23,7 +23,7 @@ import semmle.code.cpp.ir.ValueNumbering
 class NullInstruction extends ConstantValueInstruction {
   NullInstruction() {
     this.getValue() = "0" and
-    this.getResultType().getUnspecifiedType() instanceof PointerType
+    this.getResultIRType() instanceof IRAddressType
   }
 }
 
@@ -44,15 +44,15 @@ predicate explicitNullTestOfInstruction(Instruction checked, Instruction bool) {
   bool =
     any(ConvertInstruction convert |
       checked = convert.getUnary() and
-      convert.getResultType() instanceof BoolType and
-      checked.getResultType() instanceof PointerType
+      convert.getResultIRType() instanceof IRBooleanType and
+      checked.getResultIRType() instanceof IRAddressType
     )
 }
 
 pragma[noinline]
 predicate candidateResult(LoadInstruction checked, ValueNumber value, IRBlock dominator) {
   explicitNullTestOfInstruction(checked, _) and
-  not checked.getAST().isInMacroExpansion() and
+  not checked.getAst().isInMacroExpansion() and
   value.getAnInstruction() = checked and
   dominator.dominates(checked.getBlock())
 }

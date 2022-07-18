@@ -4,6 +4,7 @@
  *              to gain unauthorized access.
  * @kind path-problem
  * @problem.severity warning
+ * @security-severity 9.8
  * @precision high
  * @id js/hardcoded-credentials
  * @tags security
@@ -13,8 +14,11 @@
  */
 
 import javascript
-private import semmle.javascript.security.dataflow.HardcodedCredentials::HardcodedCredentials
+import semmle.javascript.security.dataflow.HardcodedCredentialsQuery
 import DataFlow::PathGraph
+
+bindingset[s]
+predicate looksLikeATemplate(string s) { s.regexpMatch(".*((\\{\\{.*\\}\\})|(<.*>)|(\\(.*\\))).*") }
 
 from Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink, string value
 where
@@ -23,10 +27,16 @@ where
   if source.getNode().asExpr() instanceof ConstantString
   then
     exists(string val | val = source.getNode().getStringValue() |
-      // exclude dummy passwords
+      // exclude dummy passwords and templates
       not (
-        sink.getNode().(Sink).(DefaultCredentialsSink).getKind() = "password" and
+        sink.getNode().(Sink).(DefaultCredentialsSink).getKind() =
+          ["password", "credentials", "token"] and
         PasswordHeuristics::isDummyPassword(val)
+        or
+        sink.getNode().(Sink).getKind() = "authorization header" and
+        PasswordHeuristics::isDummyAuthHeader(val)
+        or
+        looksLikeATemplate(val)
       ) and
       value = "The hard-coded value \"" + val + "\""
     )

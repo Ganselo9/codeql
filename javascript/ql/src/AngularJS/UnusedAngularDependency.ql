@@ -3,7 +3,7 @@
  * @description Unused dependencies are confusing, and should be removed.
  * @kind problem
  * @problem.severity recommendation
- * @precision high
+ * @precision low
  * @id js/angular/unused-dependency
  * @tags maintainability
  *       frameworks/angularjs
@@ -21,7 +21,7 @@ predicate isUnusedParameter(Function f, string msg, Parameter parameter) {
   )
 }
 
-predicate isMissingParameter(AngularJS::InjectableFunction f, string msg, ASTNode location) {
+predicate isMissingParameter(AngularJS::InjectableFunction f, string msg, AstNode location) {
   exists(int paramCount, int injectionCount |
     DataFlow::valueNode(location) = f and
     paramCount = f.asFunction().getNumParameter() and
@@ -41,7 +41,7 @@ predicate isMissingParameter(AngularJS::InjectableFunction f, string msg, ASTNod
   )
 }
 
-from AngularJS::InjectableFunction f, string message, ASTNode location
+from AngularJS::InjectableFunction f, string message, AstNode location
 where
   isUnusedParameter(f.asFunction(), message, location) or isMissingParameter(f, message, location)
 select location.(FirstLineOf), message

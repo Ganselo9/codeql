@@ -22,12 +22,12 @@ query predicate test_ImportNamespaceSpecifier(ImportNamespaceSpecifier ins) { an
 
 query predicate test_ImportSpecifiers(ImportSpecifier is, VarDecl res) { res = is.getLocal() }
 
-query predicate test_Imports(ImportDeclaration id, PathExprInModule res0, int res1) {
+query predicate test_Imports(ImportDeclaration id, PathExpr res0, int res1) {
   res0 = id.getImportedPath() and res1 = count(id.getASpecifier())
 }
 
-query predicate test_Module_exports(Module m, string name, ASTNode export) {
-  m.exports(name, export)
+query predicate test_Module_exports(Module m, string name, DataFlow::Node exportValue) {
+  exportValue = m.getAnExportedValue(name)
 }
 
 query predicate test_NamedImportSpecifier(NamedImportSpecifier nis) { any() }

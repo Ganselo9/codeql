@@ -4,15 +4,17 @@
  *              characters is vulnerable to insertion of malicious code.
  * @kind problem
  * @problem.severity error
- * @precision high
+ * @security-severity 8.8
+ * @precision medium
  * @id java/concatenated-sql-query
  * @tags security
  *       external/cwe/cwe-089
+ *       external/cwe/cwe-564
  */
 
 import java
 import semmle.code.java.security.SqlUnescapedLib
-import SqlInjectionLib
+import semmle.code.java.security.SqlInjectionQuery
 
 class UncontrolledStringBuilderSource extends DataFlow::ExprNode {
   UncontrolledStringBuilderSource() {
@@ -40,7 +42,7 @@ class UncontrolledStringBuilderSourceFlowConfig extends TaintTracking::Configura
 from QueryInjectionSink query, Expr uncontrolled
 where
   (
-    builtFromUncontrolledConcat(query.getExpr(), uncontrolled)
+    builtFromUncontrolledConcat(query.asExpr(), uncontrolled)
     or
     exists(StringBuilderVar sbv, UncontrolledStringBuilderSourceFlowConfig conf |
       uncontrolledStringBuilderQuery(sbv, uncontrolled) and

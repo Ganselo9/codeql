@@ -2,8 +2,9 @@
  * @name Unbounded write
  * @description Buffer write operations that do not control the length
  *              of data written may overflow.
- * @kind problem
+ * @kind path-problem
  * @problem.severity error
+ * @security-severity 9.3
  * @precision medium
  * @id cpp/unbounded-write
  * @tags reliability
@@ -16,6 +17,7 @@
 import semmle.code.cpp.security.BufferWrite
 import semmle.code.cpp.security.Security
 import semmle.code.cpp.security.TaintTracking
+import TaintedWithPath
 
 /*
  * --- Summary of CWE-120 alerts ---
@@ -31,7 +33,7 @@ import semmle.code.cpp.security.TaintTracking
  *    hasExplicitLimit()    exists(getMaxData())  exists(getBufferSize(bw.getDest(), _))) handled by
  *    NO                    NO                    either                                  UnboundedWrite.ql isUnboundedWrite()
  *    NO                    YES                   NO                                      UnboundedWrite.ql isMaybeUnboundedWrite()
- *    NO                    YES                   YES                                     OverrunWrite.ql, OverrunWriteFloat.ql
+ *    NO                    YES                   YES                                     VeryLikelyOverrunWrite.ql, OverrunWrite.ql, OverrunWriteFloat.ql
  *    YES                   either                YES                                     BadlyBoundedWrite.ql
  *    YES                   either                NO                                      (assumed OK)
  */
@@ -42,7 +44,7 @@ import semmle.code.cpp.security.TaintTracking
 
 predicate isUnboundedWrite(BufferWrite bw) {
   not bw.hasExplicitLimit() and // has no explicit size limit
-  not exists(bw.getMaxData()) // and we can't deduce an upper bound to the amount copied
+  not exists(bw.getMaxData(_)) // and we can't deduce an upper bound to the amount copied
 }
 
 /*
@@ -54,32 +56,48 @@ predicate isUnboundedWrite(BufferWrite bw) {
  * }
  */
 
+/**
+ * Holds if `e` is a source buffer going into an unbounded write `bw` or a
+ * qualifier of (a qualifier of ...) such a source.
+ */
+predicate unboundedWriteSource(Expr e, BufferWrite bw) {
+  isUnboundedWrite(bw) and e = bw.getASource()
+  or
+  exists(FieldAccess fa | unboundedWriteSource(fa, bw) and e = fa.getQualifier())
+}
+
 /*
  * --- user input reach ---
  */
 
-/**
- * Identifies expressions that are potentially tainted with user
- * input.  Most of the work for this is actually done by the
- * TaintTracking library.
- */
-predicate tainted2(Expr expr, Expr inputSource, string inputCause) {
-  taintedIncludingGlobalVars(inputSource, expr, _) and
-  inputCause = inputSource.toString()
-  or
-  exists(Expr e | tainted2(e, inputSource, inputCause) |
-    // field accesses of a tainted struct are tainted
-    e = expr.(FieldAccess).getQualifier()
-  )
+class Configuration extends TaintTrackingConfiguration {
+  override predicate isSink(Element tainted) { unboundedWriteSource(tainted, _) }
+
+  override predicate taintThroughGlobals() { any() }
 }
 
 /*
  * --- put it together ---
  */
 
-from BufferWrite bw, Expr inputSource, string inputCause
+/*
+ * An unbounded write is, for example `strcpy(..., tainted)`. We're looking
+ * for a tainted source buffer of an unbounded write, where this source buffer
+ * is a sink in the taint-tracking analysis.
+ *
+ * In the case of `gets` and `scanf`, where the source buffer is implicit, the
+ * `BufferWrite` library reports the source buffer to be the same as the
+ * destination buffer. Since those destination-buffer arguments are also
+ * modeled in the taint-tracking library as being _sources_ of taint, they are
+ * in practice reported as being tainted because the `security.TaintTracking`
+ * library does not distinguish between taint going into an argument and out of
+ * an argument. Thus, we get the desired alerts.
+ */
+
+from BufferWrite bw, Expr inputSource, Expr tainted, PathNode sourceNode, PathNode sinkNode
 where
-  isUnboundedWrite(bw) and
-  tainted2(bw.getASource(), inputSource, inputCause)
-select bw, "This '" + bw.getBWDesc() + "' with input from $@ may overflow the destination.",
-  inputSource, inputCause
+  taintedWithPath(inputSource, tainted, sourceNode, sinkNode) and
+  unboundedWriteSource(tainted, bw)
+select bw, sourceNode, sinkNode,
+  "This '" + bw.getBWDesc() + "' with input from $@ may overflow the destination.", inputSource,
+  inputSource.toString()

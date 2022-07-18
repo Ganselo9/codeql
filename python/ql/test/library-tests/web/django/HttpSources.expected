@@ -1,3 +1,4 @@
+WARNING: Type HttpRequestTaintSource has been deprecated and may be removed in future (HttpSources.ql:5,6-28)
 | test_1x.py:6:19:6:25 | request | django.request.HttpRequest |
 | test_1x.py:6:28:6:31 | path | externally controlled string |
 | test_1x.py:12:19:12:25 | request | django.request.HttpRequest |
@@ -39,6 +40,7 @@
 | views_2x_3x.py:44:24:44:30 | request | django.request.HttpRequest |
 | views_2x_3x.py:44:33:44:36 | arg0 | externally controlled string |
 | views_2x_3x.py:44:39:44:42 | arg1 | externally controlled string |
+| views_2x_3x.py:65:20:65:26 | request | django.request.HttpRequest |
 | views_2x_3x.py:78:17:78:23 | request | django.request.HttpRequest |
 | views_2x_3x.py:78:26:78:36 | page_number | externally controlled string |
 | views_2x_3x.py:81:17:81:23 | request | django.request.HttpRequest |

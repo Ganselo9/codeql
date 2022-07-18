@@ -26,6 +26,10 @@ class CheckedCast extends CastExpr {
 predicate hasTypeTest(Variable v) {
   any(InstanceOfExpr ioe).getExpr() = v.getAnAccess()
   or
+  any(NotInstanceOfExpr nioe).getExpr() = v.getAnAccess()
+  or
+  any(SafeCastExpr sce).getExpr() = v.getAnAccess()
+  or
   exists(MethodAccess ma |
     ma.getMethod().getName() = "getClass" and
     ma.getQualifier() = v.getAnAccess()
@@ -42,7 +46,7 @@ predicate hasTypeTest(Variable v) {
  */
 class ReferenceEquals extends EqualsMethod {
   ReferenceEquals() {
-    exists(Block b, ReturnStmt ret, EQExpr eq |
+    exists(BlockStmt b, ReturnStmt ret, EQExpr eq |
       this.getBody() = b and
       b.getStmt(0) = ret and
       ret.getResult() = eq and

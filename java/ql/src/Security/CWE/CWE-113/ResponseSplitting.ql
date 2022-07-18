@@ -4,6 +4,7 @@
  *              makes code vulnerable to attack by header splitting.
  * @kind path-problem
  * @problem.severity error
+ * @security-severity 6.1
  * @precision high
  * @id java/http-response-splitting
  * @tags security
@@ -11,7 +12,8 @@
  */
 
 import java
-import ResponseSplitting
+import semmle.code.java.dataflow.FlowSources
+import semmle.code.java.security.ResponseSplitting
 import DataFlow::PathGraph
 
 class ResponseSplittingConfig extends TaintTracking::Configuration {
@@ -19,7 +21,7 @@ class ResponseSplittingConfig extends TaintTracking::Configuration {
 
   override predicate isSource(DataFlow::Node source) {
     source instanceof RemoteFlowSource and
-    not source instanceof WhitelistedSource
+    not source instanceof SafeHeaderSplittingSource
   }
 
   override predicate isSink(DataFlow::Node sink) { sink instanceof HeaderSplittingSink }

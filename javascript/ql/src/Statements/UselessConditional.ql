@@ -62,6 +62,14 @@ predicate isInitialParameterUse(Expr e) {
     not p.isRestParameter()
   )
   or
+  // same as above, but for captured variables
+  exists(SimpleParameter p, LocalVariable var |
+    var = p.getVariable() and
+    var.isCaptured() and
+    e = var.getAnAccess() and
+    not p.isRestParameter()
+  )
+  or
   isInitialParameterUse(e.(LogNotExpr).getOperand())
 }
 
@@ -131,12 +139,12 @@ predicate whitelist(Expr e) {
  * The return value of `e` may have other uses besides the truthiness check,
  * but if the truthiness check always goes one way, it still indicates an error.
  */
-predicate isConditional(ASTNode cond, Expr e) {
+predicate isConditional(AstNode cond, Expr e) {
   isExplicitConditional(cond, e) or
   e = cond.(LogicalBinaryExpr).getLeftOperand()
 }
 
-from ASTNode cond, DataFlow::AnalyzedNode op, boolean cv, ASTNode sel, string msg
+from AstNode cond, DataFlow::AnalyzedNode op, boolean cv, AstNode sel, string msg
 where
   isConditional(cond, op.asExpr()) and
   cv = op.getTheBooleanValue() and

@@ -13,7 +13,7 @@ import semmle.code.cpp.commons.Assertions
 
 class MacroFunctionCall extends MacroInvocation {
   MacroFunctionCall() {
-    not exists(getParentInvocation()) and
+    not exists(this.getParentInvocation()) and
     this.getMacro().getHead().matches("%(%")
   }
 
@@ -27,7 +27,7 @@ int logicalLength(FunctionDeclarationEntry f) {
     count(Stmt s |
         s.getEnclosingFunction() = f.getFunction() and
         s.getFile() = f.getFile() and
-        not s instanceof Block and
+        not s instanceof BlockStmt and
         not s instanceof EmptyStmt and
         not exists(ForStmt for | s = for.getInitialization()) and
         not s.isAffectedByMacro()

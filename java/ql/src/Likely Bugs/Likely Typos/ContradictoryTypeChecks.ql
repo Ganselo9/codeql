@@ -18,7 +18,7 @@ import semmle.code.java.dataflow.SSA
 /** `ioe` is of the form `va instanceof t`. */
 predicate instanceOfCheck(InstanceOfExpr ioe, VarAccess va, RefType t) {
   ioe.getExpr() = va and
-  ioe.getTypeName().getType().(RefType).getSourceDeclaration() = t
+  ioe.getCheckedType().getSourceDeclaration() = t
 }
 
 /** Expression `e` assumes that `va` could be of type `t`. */
@@ -38,7 +38,7 @@ predicate contradictoryTypeCheck(Expr e, Variable v, RefType t, RefType sup, Exp
   exists(SsaVariable ssa |
     ssa.getSourceVariable().getVariable() = v and
     requiresInstanceOf(e, ssa.getAUse(), t) and
-    sup = t.getASupertype*() and
+    sup = t.getAnAncestor() and
     instanceOfCheck(cond, ssa.getAUse(), sup) and
     cond.(Guard).controls(e.getBasicBlock(), false)
   )

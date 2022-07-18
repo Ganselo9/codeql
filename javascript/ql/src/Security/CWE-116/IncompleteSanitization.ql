@@ -4,12 +4,14 @@
  *              meta-character may be ineffective.
  * @kind problem
  * @problem.severity warning
+ * @security-severity 7.8
  * @precision high
  * @id js/incomplete-sanitization
  * @tags correctness
  *       security
+ *       external/cwe/cwe-020
+ *       external/cwe/cwe-080
  *       external/cwe/cwe-116
- *       external/cwe/cwe-20
  */
 
 import javascript
@@ -67,7 +69,7 @@ predicate isBackslashEscape(StringReplaceCall mce, DataFlow::RegExpLiteralNode r
  */
 predicate allBackslashesEscaped(DataFlow::Node nd) {
   // `JSON.stringify` escapes backslashes
-  nd = DataFlow::globalVarRef("JSON").getAMemberCall("stringify")
+  nd instanceof JsonStringifyCall
   or
   // check whether `nd` itself escapes backslashes
   exists(DataFlow::RegExpLiteralNode rel | isBackslashEscape(nd, rel) |
@@ -78,13 +80,11 @@ predicate allBackslashesEscaped(DataFlow::Node nd) {
   or
   // flow through string methods
   exists(DataFlow::MethodCallNode mc, string m |
-    m = "replace" or
-    m = "slice" or
-    m = "substr" or
-    m = "substring" or
-    m = "toLowerCase" or
-    m = "toUpperCase" or
-    m = "trim"
+    m =
+      [
+        "replace", "replaceAll", "slice", "substr", "substring", "toLowerCase", "toUpperCase",
+        "trim"
+      ]
   |
     mc = nd and m = mc.getMethodName() and allBackslashesEscaped(mc.getReceiver())
   )
@@ -96,7 +96,7 @@ predicate allBackslashesEscaped(DataFlow::Node nd) {
 /**
  * Holds if `repl` looks like a call to "String.prototype.replace" that deliberately removes the first occurrence of `str`.
  */
-predicate removesFirstOccurence(StringReplaceCall repl, string str) {
+predicate removesFirstOccurrence(StringReplaceCall repl, string str) {
   not exists(repl.getRegExp()) and repl.replaces(str, "")
 }
 
@@ -117,8 +117,8 @@ predicate isDelimiterUnwrapper(
     or
     left = "'" and right = "'"
   |
-    removesFirstOccurence(leftUnwrap, left) and
-    removesFirstOccurence(rightUnwrap, right) and
+    removesFirstOccurrence(leftUnwrap, left) and
+    removesFirstOccurrence(rightUnwrap, right) and
     leftUnwrap.getAMethodCall() = rightUnwrap
   )
 }

@@ -3,7 +3,7 @@
  * @description An AngularJS event listener that listens for a non-existent event has no effect.
  * @kind problem
  * @problem.severity warning
- * @precision medium
+ * @precision low
  * @id js/angular/dead-event-listener
  * @tags correctness
  *       frameworks/angularjs
@@ -16,28 +16,26 @@ import javascript
  */
 predicate isABuiltinEventName(string name) {
   // $rootScope.Scope
-  name = "$destroy" or
+  name = "$destroy"
+  or
   // $location
-  name = "$locationChangeStart" or
-  name = "$locationChangeSuccess" or
+  name = ["$locationChangeStart", "$locationChangeSuccess"]
+  or
   // ngView
-  name = "$viewContentLoaded" or
+  name = "$viewContentLoaded"
+  or
   // angular-ui/ui-router
-  name = "$stateChangeStart" or
-  name = "$stateNotFound" or
-  name = "$stateChangeSuccess" or
-  name = "$stateChangeError" or
-  name = "$viewContentLoading " or
-  name = "$viewContentLoaded " or
+  name =
+    [
+      "$stateChangeStart", "$stateNotFound", "$stateChangeSuccess", "$stateChangeError",
+      "$viewContentLoading ", "$viewContentLoaded "
+    ]
+  or
   // $route
-  name = "$routeChangeStart" or
-  name = "$routeChangeSuccess" or
-  name = "$routeChangeError" or
-  name = "$routeUpdate" or
+  name = ["$routeChangeStart", "$routeChangeSuccess", "$routeChangeError", "$routeUpdate"]
+  or
   // ngInclude
-  name = "$includeContentRequested" or
-  name = "$includeContentLoaded" or
-  name = "$includeContentError"
+  name = ["$includeContentRequested", "$includeContentLoaded", "$includeContentError"]
 }
 
 /**

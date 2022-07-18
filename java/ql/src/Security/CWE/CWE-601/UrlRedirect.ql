@@ -4,6 +4,7 @@
  *              may cause redirection to malicious web sites.
  * @kind path-problem
  * @problem.severity error
+ * @security-severity 6.1
  * @precision high
  * @id java/unvalidated-url-redirection
  * @tags security
@@ -12,7 +13,7 @@
 
 import java
 import semmle.code.java.dataflow.FlowSources
-import UrlRedirect
+import semmle.code.java.security.UrlRedirect
 import DataFlow::PathGraph
 
 class UrlRedirectConfig extends TaintTracking::Configuration {

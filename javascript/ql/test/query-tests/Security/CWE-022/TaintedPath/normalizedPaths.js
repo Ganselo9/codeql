@@ -205,7 +205,7 @@ app.get('/join-regression', (req, res) => {
     fs.readFileSync(normalizedPath); // NOT OK
 
   if (normalizedPath.startsWith('/home/user/www') || normalizedPath.startsWith('/home/user/public'))
-    fs.readFileSync(normalizedPath); // OK - but flagged anyway
+    fs.readFileSync(normalizedPath); // OK - but flagged anyway [INCONSISTENCY]
   else
     fs.readFileSync(normalizedPath); // NOT OK
 });
@@ -369,5 +369,36 @@ app.get('/yet-another-prefix2', (req, res) => {
 
   function allowPath(requestPath, rootPath) {
     return requestPath.indexOf(rootPath) === 0;
+  }
+});
+
+import slash from 'slash';
+app.get('/slash-stuff', (req, res) => {
+  let path = req.query.path;
+
+  fs.readFileSync(path); // NOT OK
+
+  fs.readFileSync(slash(path)); // NOT OK
+});
+
+app.get('/dotdot-regexp', (req, res) => {
+  let path = pathModule.normalize(req.query.x);
+  if (pathModule.isAbsolute(path))
+    return;
+  fs.readFileSync(path); // NOT OK
+  if (!path.match(/\./)) {
+    fs.readFileSync(path); // OK
+  }
+  if (!path.match(/\.\./)) {
+    fs.readFileSync(path); // OK
+  }
+  if (!path.match(/\.\.\//)) {
+    fs.readFileSync(path); // OK
+  }
+  if (!path.match(/\.\.\/foo/)) {
+    fs.readFileSync(path); // NOT OK
+  }
+  if (!path.match(/(\.\.\/|\.\.\\)/)) {
+    fs.readFileSync(path); // OK
   }
 });

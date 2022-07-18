@@ -183,6 +183,8 @@
 | IReadOnlyList<T4> | dynamic |
 | Int16[] | Object |
 | Int16[] | dynamic |
+| Int32[,] | Object |
+| Int32[,] | dynamic |
 | Int32[] | Object |
 | Int32[] | dynamic |
 | Int64[] | Object |
@@ -221,6 +223,8 @@
 | T5 | C1 |
 | T5 | Object |
 | T5 | dynamic |
+| UInt16[][] | Object |
+| UInt16[][] | dynamic |
 | UInt32[] | Object |
 | UInt32[] | dynamic |
 | UInt64[] | Object |
@@ -279,6 +283,7 @@
 | null | IReadOnlyList<T3> |
 | null | IReadOnlyList<T4> |
 | null | Int16[] |
+| null | Int32[,] |
 | null | Int32[] |
 | null | Int64[] |
 | null | Object |
@@ -289,6 +294,7 @@
 | null | T4 |
 | null | T4[] |
 | null | T5 |
+| null | UInt16[][] |
 | null | UInt32[] |
 | null | UInt64[] |
 | null | dynamic |

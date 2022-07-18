@@ -1,28 +1,31 @@
 ﻿using Semmle.Util.Logging;
+using System;
 
 namespace Semmle.BuildAnalyser
 {
     /// <summary>
     /// Callback for various events that may happen during the build analysis.
     /// </summary>
-    interface IProgressMonitor
+    internal interface IProgressMonitor
     {
         void FindingFiles(string dir);
         void UnresolvedReference(string id, string project);
-        void AnalysingProjectFiles(int count);
+        void AnalysingSolution(string filename);
         void FailedProjectFile(string filename, string reason);
         void FailedNugetCommand(string exe, string args, string message);
         void NugetInstall(string package);
         void ResolvedReference(string filename);
-        void Summary(int existingSources, int usedSources, int missingSources, int references, int unresolvedReferences, int resolvedConflicts, int totalProjects, int failedProjects);
-        void Warning(string message);
+        void Summary(int existingSources, int usedSources, int missingSources, int references, int unresolvedReferences, int resolvedConflicts, int totalProjects, int failedProjects, TimeSpan analysisTime);
+        void Log(Severity severity, string message);
         void ResolvedConflict(string asm1, string asm2);
         void MissingProject(string projectFile);
+        void CommandFailed(string exe, string arguments, int exitCode);
+        void MissingNuGet();
     }
 
-    class ProgressMonitor : IProgressMonitor
+    internal class ProgressMonitor : IProgressMonitor
     {
-        readonly ILogger logger;
+        private readonly ILogger logger;
 
         public ProgressMonitor(ILogger logger)
         {
@@ -46,9 +49,9 @@ namespace Semmle.BuildAnalyser
             logger.Log(Severity.Debug, "Unresolved {0} referenced by {1}", id, project);
         }
 
-        public void AnalysingProjectFiles(int count)
+        public void AnalysingSolution(string filename)
         {
-            logger.Log(Severity.Info, "Analyzing project files...");
+            logger.Log(Severity.Info, $"Analyzing {filename}...");
         }
 
         public void FailedProjectFile(string filename, string reason)
@@ -73,7 +76,9 @@ namespace Semmle.BuildAnalyser
         }
 
         public void Summary(int existingSources, int usedSources, int missingSources,
-            int references, int unresolvedReferences, int resolvedConflicts, int totalProjects, int failedProjects)
+            int references, int unresolvedReferences,
+            int resolvedConflicts, int totalProjects, int failedProjects,
+            TimeSpan analysisTime)
         {
             logger.Log(Severity.Info, "");
             logger.Log(Severity.Info, "Build analysis summary:");
@@ -85,21 +90,32 @@ namespace Semmle.BuildAnalyser
             logger.Log(Severity.Info, "{0, 6} resolved assembly conflicts", resolvedConflicts);
             logger.Log(Severity.Info, "{0, 6} projects", totalProjects);
             logger.Log(Severity.Info, "{0, 6} missing/failed projects", failedProjects);
+            logger.Log(Severity.Info, "Build analysis completed in {0}", analysisTime);
         }
 
-        public void Warning(string message)
+        public void Log(Severity severity, string message)
         {
-            logger.Log(Severity.Warning, message);
+            logger.Log(severity, message);
         }
 
         public void ResolvedConflict(string asm1, string asm2)
         {
-            logger.Log(Severity.Info, "Resolved {0} as {1}", asm1, asm2);
+            logger.Log(Severity.Debug, "Resolved {0} as {1}", asm1, asm2);
         }
 
         public void MissingProject(string projectFile)
         {
             logger.Log(Severity.Info, "Solution is missing {0}", projectFile);
+        }
+
+        public void CommandFailed(string exe, string arguments, int exitCode)
+        {
+            logger.Log(Severity.Error, $"Command {exe} {arguments} failed with exit code {exitCode}");
+        }
+
+        public void MissingNuGet()
+        {
+            logger.Log(Severity.Error, "Missing nuget.exe");
         }
     }
 }

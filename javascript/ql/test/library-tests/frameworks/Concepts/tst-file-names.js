@@ -1,4 +1,4 @@
-let walkSync = require('walkSync'),
+let walkSync = require('walk-sync'),
     walk = require('walk'),
     glob = require('glob'),
     globby = require('globby'),
@@ -50,3 +50,15 @@ async function bar() {
   var foo = globby(_);
   var files = await foo;
 }
+
+const chokidar = require('chokidar');
+chokidar.watch('.')
+  .on('all', (event, path) => {
+    console.log(event, path);
+  })
+  .on('change', path => {
+    console.log(path);
+  })
+  .on('ready', path => {
+    console.log(path);
+  });

@@ -47,4 +47,39 @@
   });
 
   sink(arr[0]); // OK - tuple like usage. 
+
+  for (const x of arr) {
+    sink(x); // NOT OK
+  }
+
+  for (const x of Array.from(arr)) {
+    sink(x); // NOT OK
+  }
+
+  for (const x of [...arr]) {
+    sink(x); // NOT OK
+  }
+  
+  var arr7 = [];
+  arr7.push(...arr);
+  for (const x of arr7) {
+    sink(x); // NOT OK
+  }
+
+  const arrayFrom = require("array-from");
+  for (const x of arrayFrom(arr)) {
+    sink(x); // NOT OK
+  }
+
+  sink(arr.find(someCallback)); // NOT OK
+
+  const arrayFind = require("array-find");
+  sink(arrayFind(arr, someCallback)); // NOT OK
+
+  const uniq = require("uniq");
+  for (const x of uniq(arr)) {
+    sink(x); // NOT OK
+  }
+
+  sink(arr.at(-1)); // NOT OK
 });

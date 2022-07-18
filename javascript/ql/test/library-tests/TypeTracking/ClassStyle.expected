@@ -38,6 +38,9 @@ test_Connection
 | tst.js:112:10:112:14 | obj.x |
 | tst.js:114:1:114:28 | getX({  ... on() }) |
 | tst.js:114:11:114:25 | getConnection() |
+| tst.js:118:12:118:26 | getConnection() |
+| tst.js:120:21:120:24 | conn |
+| tst.js:126:22:126:25 | conn |
 | tst_conflict.js:6:38:6:77 | api.cha ... ction() |
 test_DataCallback
 | client.js:3:28:3:34 | x => {} |
@@ -45,8 +48,10 @@ test_DataCallback
 | tst.js:21:1:23:1 | functio ... ata);\\n} |
 | tst.js:30:26:30:27 | cb |
 | tst.js:33:17:33:26 | data => {} |
+| tst.js:37:1:39:1 | return of function getDataCurry |
 | tst.js:38:10:38:19 | data => {} |
 | tst.js:40:32:40:45 | getDataCurry() |
+| tst.js:45:1:47:1 | return of function identity |
 | tst.js:45:19:45:20 | cb |
 | tst.js:48:32:48:60 | identit ... llback) |
 | tst.js:51:1:51:37 | functio ... ata) {} |

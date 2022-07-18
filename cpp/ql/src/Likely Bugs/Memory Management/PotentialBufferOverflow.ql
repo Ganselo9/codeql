@@ -6,13 +6,14 @@
  * @kind problem
  * @id cpp/potential-buffer-overflow
  * @problem.severity warning
+ * @security-severity 10.0
  * @tags reliability
  *       security
  *       external/cwe/cwe-676
  * @deprecated This query is deprecated, use
  *             Potentially overrunning write (`cpp/overrunning-write`) and
  *             Potentially overrunning write with float to string conversion
- *             (`cpp/overrunning-write-with-float) instead.
+ *             (`cpp/overrunning-write-with-float`) instead.
  */
 
 import cpp

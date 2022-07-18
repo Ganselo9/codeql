@@ -171,7 +171,7 @@ public class C {
 
   private void verifyBool(boolean b) {
     if (!b) {
-      throw new Exception();
+      throw new Error();
     }
   }
 
@@ -192,7 +192,7 @@ public class C {
 
   private void verifyNotNull(Object obj) {
     if (obj == null) {
-      throw new Exception();
+      throw new Error();
     }
   }
 
@@ -219,5 +219,29 @@ public class C {
     if (o1.equals(o2)) { // NPE - false positive
       return;
     }
+  }
+
+  private Object foo16;
+
+  private Object getFoo16() {
+    return this.foo16;
+  }
+
+  public static void ex16(C c) {
+    int[] xs = c.getFoo16() != null ? new int[5] : null;
+    if (c.getFoo16() != null) {
+      xs[0]++; // NPE - false positive
+    }
+  }
+
+  public static final int MAXLEN = 1024;
+
+  public void ex17() {
+    int[] xs = null;
+    // loop executes at least once
+    for (int i = 32; i <= MAXLEN; i *= 2) {
+      xs = new int[5];
+    }
+    xs[0]++; // OK
   }
 }

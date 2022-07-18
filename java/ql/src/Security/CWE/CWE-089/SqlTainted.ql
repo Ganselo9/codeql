@@ -4,15 +4,17 @@
  *              malicious code by the user.
  * @kind path-problem
  * @problem.severity error
+ * @security-severity 8.8
  * @precision high
  * @id java/sql-injection
  * @tags security
  *       external/cwe/cwe-089
+ *       external/cwe/cwe-564
  */
 
 import java
 import semmle.code.java.dataflow.FlowSources
-import SqlInjectionLib
+import semmle.code.java.security.SqlInjectionQuery
 import DataFlow::PathGraph
 
 from QueryInjectionSink query, DataFlow::PathNode source, DataFlow::PathNode sink

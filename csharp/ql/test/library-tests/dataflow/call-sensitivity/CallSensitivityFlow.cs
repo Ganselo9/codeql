@@ -129,7 +129,6 @@ public class A
             }
         }
 
-
         public void CallSinkIfFalse(object o, bool cond)
         {
             if (!cond)
@@ -137,7 +136,6 @@ public class A
                 Sink(o);
             }
         }
-
 
         public void LocalCallSensitivity(object o, bool c)
         {
@@ -161,10 +159,19 @@ public class A2
     {
     }
 
-    public void M()
+    public virtual void M(object o)
     {
-
+        Sink(o);
     }
+
+    public static void CallM(A2 a2, object o)
+    {
+        a2.M(o);
+    }
+
+    public virtual object MOut() => new object();
+
+    public static object CallMOut(A2 a2) => a2.MOut();
 
     public void Callsite(InterfaceB intF)
     {
@@ -172,28 +179,37 @@ public class A2
         // in both possible implementations of foo, this callsite is relevant
         // in IntA, it improves virtual dispatch,
         // and in IntB, it improves the dataflow analysis.
-        intF.Foo(b, new object(), false);
+        intF.Foo(b, new object(), false); // no flow to `Sink()` via `A2.M()`, but flow via `IntA.Foo()`
+
+        CallM(b, new object()); // no flow to `Sink()`
+        CallM(this, new object());  // flow to `Sink()`
+
+        var o = CallMOut(this);
+        Sink(o); // flow
+        o = CallMOut(b);
+        Sink(o); // no flow
     }
 
-    private class B : A2
+    public class B : A2
     {
-        public void M()
+        public override void M(object o)
         {
 
         }
+
+        public override object MOut() => throw null;
     }
 
-    private class IntA : InterfaceB
+    public class IntA : InterfaceB
     {
-
         public void Foo(A2 obj, object o, bool cond)
         {
-            obj.M();
+            obj.M(o);
             Sink(o);
         }
     }
 
-    private class IntB : InterfaceB
+    public class IntB : InterfaceB
     {
 
         public void Foo(A2 obj, object o, bool cond)
@@ -204,7 +220,6 @@ public class A2
             }
         }
     }
-
 }
 
 public interface InterfaceA

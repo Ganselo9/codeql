@@ -4,6 +4,7 @@
  *              scripting vulnerability if the data was originally user-provided.
  * @kind path-problem
  * @problem.severity error
+ * @security-severity 6.1
  * @precision medium
  * @id cs/web/stored-xss
  * @tags security
@@ -13,15 +14,17 @@
 
 import csharp
 import semmle.code.csharp.security.dataflow.flowsources.Stored
-import semmle.code.csharp.security.dataflow.XSS::XSS
-import semmle.code.csharp.dataflow.DataFlow::DataFlow::PathGraph
+import semmle.code.csharp.security.dataflow.XSSQuery
+import semmle.code.csharp.security.dataflow.XSSSinks
+import semmle.code.csharp.dataflow.DataFlow2
+import DataFlow2::PathGraph
 
 class StoredTaintTrackingConfiguration extends TaintTrackingConfiguration {
-  override predicate isSource(DataFlow::Node source) { source instanceof StoredFlowSource }
+  override predicate isSource(DataFlow2::Node source) { source instanceof StoredFlowSource }
 }
 
 from
-  StoredTaintTrackingConfiguration c, DataFlow::PathNode source, DataFlow::PathNode sink,
+  StoredTaintTrackingConfiguration c, DataFlow2::PathNode source, DataFlow2::PathNode sink,
   string explanation
 where
   c.hasFlowPath(source, sink) and

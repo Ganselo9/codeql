@@ -4,18 +4,20 @@
  *              debug builds provide additional information useful to a malicious attacker.
  * @kind problem
  * @problem.severity warning
+ * @security-severity 7.5
  * @precision very-high
  * @id cs/web/debug-binary
  * @tags security
  *       maintainability
  *       frameworks/asp.net
  *       external/cwe/cwe-11
+ *       external/cwe/cwe-532
  */
 
 import csharp
 import semmle.code.asp.WebConfig
 
-from SystemWebXMLElement web, XMLAttribute debugAttribute
+from SystemWebXmlElement web, XMLAttribute debugAttribute
 where
   debugAttribute = web.getAChild("compilation").getAttribute("debug") and
   not debugAttribute.getValue().toLowerCase() = "false"

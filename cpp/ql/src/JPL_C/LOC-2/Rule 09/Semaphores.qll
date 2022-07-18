@@ -6,12 +6,7 @@ import cpp
 
 class SemaphoreCreation extends FunctionCall {
   SemaphoreCreation() {
-    exists(string name | name = this.getTarget().getName() |
-      name = "semBCreate" or
-      name = "semMCreate" or
-      name = "semCCreate" or
-      name = "semRWCreate"
-    )
+    this.getTarget().getName() = ["semBCreate", "semMCreate", "semCCreate", "semRWCreate"]
   }
 
   Variable getSemaphore() { result.getAnAccess() = this.getParent().(Assignment).getLValue() }
@@ -27,7 +22,7 @@ abstract class LockOperation extends FunctionCall {
   ControlFlowNode getAReachedNode() {
     result = this
     or
-    exists(ControlFlowNode mid | mid = getAReachedNode() |
+    exists(ControlFlowNode mid | mid = this.getAReachedNode() |
       not mid != this.getMatchingUnlock() and
       result = mid.getASuccessor()
     )
@@ -55,7 +50,7 @@ class SemaphoreTake extends LockOperation {
     result.(SemaphoreGive).getLocked() = this.getLocked()
   }
 
-  override string say() { result = "semaphore take of " + getLocked().getName() }
+  override string say() { result = "semaphore take of " + this.getLocked().getName() }
 }
 
 class SemaphoreGive extends UnlockOperation {
@@ -72,11 +67,7 @@ class SemaphoreGive extends UnlockOperation {
 }
 
 class LockingPrimitive extends FunctionCall, LockOperation {
-  LockingPrimitive() {
-    exists(string name | name = this.getTarget().getName() |
-      name = "taskLock" or name = "intLock" or name = "taskRtpLock"
-    )
-  }
+  LockingPrimitive() { this.getTarget().getName() = ["taskLock", "intLock", "taskRtpLock"] }
 
   override Function getLocked() { result = this.getTarget() }
 
@@ -85,17 +76,13 @@ class LockingPrimitive extends FunctionCall, LockOperation {
       this.getTarget().getName().replaceAll("Lock", "Unlock")
   }
 
-  override string say() { result = "call to " + getLocked().getName() }
+  override string say() { result = "call to " + this.getLocked().getName() }
 }
 
 class UnlockingPrimitive extends FunctionCall, UnlockOperation {
-  UnlockingPrimitive() {
-    exists(string name | name = this.getTarget().getName() |
-      name = "taskUnlock" or name = "intUnlock" or name = "taskRtpUnlock"
-    )
-  }
+  UnlockingPrimitive() { this.getTarget().getName() = ["taskUnlock", "intUnlock", "taskRtpUnlock"] }
 
-  Function getLocked() { result = getMatchingLock().getLocked() }
+  Function getLocked() { result = this.getMatchingLock().getLocked() }
 
   override LockOperation getMatchingLock() { this = result.getMatchingUnlock() }
 }
